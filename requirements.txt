@@ -1,0 +1,4 @@
+networkx==3.3
+py2neo==2021.2.4
+pydantic==2.7.0
+python-dotenv==1.0.1

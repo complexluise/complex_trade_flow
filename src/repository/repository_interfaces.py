@@ -2,12 +2,13 @@
 
 from abc import ABC, abstractmethod
 
+
 class IGraphDatabaseRepository(ABC):
     """
-    Interface for a graph database repository, defining the essential data access operations 
+    Interface for a graph database repository, defining the essential data access operations
     that can be performed on a graph database.
     """
-    
+
     @abstractmethod
     def add_node(self, node_data):
         pass
