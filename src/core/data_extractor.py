@@ -1,11 +1,13 @@
-"""This module contains the DataExtractor class, which handles the data extraction logic."""
+import csv
+from typing import List, Dict
+from src.models.pydantic_models import TradeData
 
 class DataExtractor:
-    """
-    The DataExtractor is responsible for extracting data from various data sources 
-    like databases, APIs, or file systems.
-    """
-    
-    def extract_from_source(self):
-        """Extracts data from the configured data sources."""
-        pass
+    def extract_trade_data(self, file_path: str) -> List[Dict]:
+        extracted_data = []
+        with open(file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                trade_data = TradeData.parse_obj(row)
+                extracted_data.append(trade_data.dict())
+        return extracted_data

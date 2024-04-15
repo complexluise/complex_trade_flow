@@ -1,11 +1,12 @@
-"""This module contains the DataLoader class, responsible for loading data into the database."""
+import networkx as nx
+from typing import List, Dict
+from src.models.pydantic_models import TradeData
 
 class DataLoader:
-    """
-    The DataLoader takes transformed data and loads it into the target database, 
-    ensuring that the data is stored correctly and efficiently.
-    """
-    
-    def load_data(self):
-        """Loads transformed data into the database."""
-        pass
+    @staticmethod
+    def load_to_graph(data: List[Dict]) -> nx.DiGraph:
+        G = nx.DiGraph()
+        for item in data:
+            # Here you'd load data into your graph database, for now we'll just build a NetworkX graph
+            G.add_edge(item['exporter'], item['importer'], weight=item['value'])
+        return G
