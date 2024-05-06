@@ -1,12 +1,13 @@
 """This module contains the ApplicationServer class, which coordinates the ETL process and handles requests from the CLI."""
 
+
 class ApplicationServer:
     """
-    The ApplicationServer acts as the central coordinator for initiating and 
+    The ApplicationServer acts as the central coordinator for initiating and
     managing the ETL process, and serves as the intermediary between the CLI
     and the core ETL components.
     """
-    
+
     def process_etl_request(self):
         """Initiates the ETL process."""
         pass

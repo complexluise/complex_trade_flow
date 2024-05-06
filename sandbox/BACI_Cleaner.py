@@ -222,7 +222,9 @@ class BACI_Cleaner:
         year_base = 2013  # year that have less change in the first neigbour
         gdp_based = float(self.get_gdp_linked(year_base))
 
-        df["Value"] = df["Value"].apply(lambda x: float(x) / gdp_linked/gdp_based * 100)
+        df["Value"] = df["Value"].apply(
+            lambda x: float(x) / gdp_linked / gdp_based * 100
+        )
         return df
 
     def data_clean_by_year(self, filename, money_type="current_USD", graph=True):
@@ -383,7 +385,7 @@ if __name__ == "__main__":
     DATASET = "BACI_HS92_V202301"
     print("Dataset: ", DATASET)
     cleaner_obj = BACI_Cleaner(DATASET)
-    #lista = cleaner_obj.list_files_raw
+    # lista = cleaner_obj.list_files_raw
     lista = ["BACI_HS92_Y2015_V202301.csv", "BACI_HS92_Y2018_V202301.csv"]
     for filename in lista:
         cleaner_obj.data_clean_by_year(filename, money_type="constant_USD")

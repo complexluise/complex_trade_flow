@@ -1,11 +1,9 @@
-"""This module contains the DataTransformer class, which manages the data transformation logic."""
+from typing import List, Dict
+from src.models.pydantic_models import TradeData
+
 
 class DataTransformer:
-    """
-    The DataTransformer is responsible for transforming raw data into a format that is 
-    suitable for analysis and loading into the database.
-    """
-    
-    def transform_data(self):
-        """Transforms raw data according to the business rules and requirements."""
-        pass
+    @staticmethod
+    def filter_by_product_category(data: List[Dict], product_code: str) -> List[Dict]:
+        """Filter by product category code."""
+        return [record for record in data if record["product_category"] == product_code]

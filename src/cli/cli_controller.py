@@ -1,7 +1,8 @@
 """This module provides the CLIController class, the entry point for the CLI, handling user commands."""
 
 import argparse
-from core.application_server import ApplicationServer
+from src.core.application_server import ApplicationServer
+
 
 class CLIController:
     """
@@ -9,7 +10,7 @@ class CLIController:
     """
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser(description='CLI for ETL Process')
+        self.parser = argparse.ArgumentParser(description="CLI for ETL Process")
         self.setup_arguments()
         self.app_server = ApplicationServer()
 
@@ -18,7 +19,9 @@ class CLIController:
         Set up the command line arguments expected by the program.
         """
         # Add command line argument configurations here
-        self.parser.add_argument('-e', '--extract', help='Initiate the ETL process', action='store_true')
+        self.parser.add_argument(
+            "-e", "--extract", help="Initiate the ETL process", action="store_true"
+        )
         # Add other arguments as needed
 
     def parse_arguments(self):
@@ -26,7 +29,7 @@ class CLIController:
         Parse and handle the command line arguments.
         """
         args = self.parser.parse_args()
-        
+
         if args.extract:
             self.execute_etl_process()
         # Add more argument handling as necessary
@@ -44,9 +47,11 @@ class CLIController:
         """
         print(results)  # Placeholder for demonstration; implement as needed
 
+
 def main():
     controller = CLIController()
     controller.parse_arguments()
+
 
 if __name__ == "__main__":
     main()

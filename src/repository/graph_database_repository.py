@@ -1,31 +1,47 @@
-"""This module contains the GraphDatabaseRepository class, implementing the repository pattern for graph database interactions."""
+from py2neo import Graph, Node, Relationship
+
+from src.repository.graph_database_repository import Neo4jQueryManager
+
 
 class GraphDatabaseRepository:
-    """
-    The GraphDatabaseRepository abstracts the interactions with the graph database, 
-    providing a collection-like interface for accessing and manipulating nodes and edges.
-    """
-    
-    def add_node(self, node_data):
-        """Adds a node to the graph database."""
-        pass
+    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="test"):
+        self.graph = Graph(uri, auth=(user, password))
 
-    def add_edge(self, start_node, end_node, edge_data):
-        """Adds an edge between two nodes in the graph database."""
-        pass
+    def add_country(self, iso3: str, name: str):
+        country = Node("Country", iso3=iso3, name=name)
+        self.graph.merge(country, "Country", "iso3")
 
-    def get_node(self, node_id):
-        """Retrieves a node from the graph database."""
-        pass
+    def add_trade_relation(
+        self,
+        exporter_iso3: str,
+        importer_iso3: str,
+        product_category: str,
+        year: int,
+        value: float,
+        quantity: float,
+    ):
+        exporter = Node("Country", iso3=exporter_iso3)
+        importer = Node("Country", iso3=importer_iso3)
+        relationship = Relationship(
+            exporter,
+            "EXPORTS_TO",
+            importer,
+            product_category=product_category,
+            year=year,
+            value=value,
+            quantity=quantity,
+        )
+        self.graph.merge(relationship, "EXPORTS_TO", "product_category", "year")
 
-    def get_edge(self, start_node, end_node):
-        """Retrieves an edge between two nodes from the graph database."""
-        pass
+    def find_trades(self, iso3: str):
+        return self.graph.run(Neo4jQueryManager.find_trades, iso3=iso3).data()
 
-    def query_data(self, query):
-        """Executes a query against the graph database."""
-        pass
 
-    def close(self):
-        """Closes the connection to the graph database."""
-        pass
+# Usage of the repository
+if __name__ == "__main__":
+    repo = GraphDatabaseRepository()
+    repo.add_country("USA", "United States of America")
+    repo.add_country("CAN", "Canada")
+    repo.add_trade_relation("USA", "CAN", "Electronics", 2021, 500000, 400)
+
+    print(repo.find_trades("USA"))

@@ -3,6 +3,7 @@ import os
 import re
 import networkx as nx
 
+
 def filter_product(df, product_code, hs_code="HS6"):
     if hs_code == "HS6":
         bool_mask = df["Product category"] == product_code
@@ -14,10 +15,12 @@ def filter_product(df, product_code, hs_code="HS6"):
     df_filtered = df[bool_mask]
     return df_filtered
 
+
 def merge_links(df, by_columns=["Exporter", "Importer"], HarmonizedSystem=4):
     df_merge = df.groupby(by=by_columns).sum()
     df_merge.reset_index(inplace=True)
     return df_merge
+
 
 def add_metadata(df_left, df_right, tuple_columns):
     df_right = df_right.rename(mapper=lambda x: tuple_columns[0] + "_" + str(x), axis=1)
@@ -29,12 +32,14 @@ def add_metadata(df_left, df_right, tuple_columns):
     )
     return df_result
 
+
 def string2float(x):
     try:
         number = re.search(r"\d+.?\d+", x).group(0)
     except:
         number = "0"
     return number
+
 
 def pandas_2_graph(df):
     G = nx.DiGraph()
@@ -43,6 +48,8 @@ def pandas_2_graph(df):
             [(row[1]["Exporter"], row[1]["Importer"], row[1]["Value"])]
         )
     return G
+
+
 class BACI_Cleaner:
     def __init__(self, dataset):
         self.FOLDERS = {
@@ -150,7 +157,9 @@ class BACI_Cleaner:
         year_base = 2013  # year that have less change in the first neigbour
         gdp_based = float(self.get_gdp_linked(year_base))
 
-        df["Value"] = df["Value"].apply(lambda x: float(x) / gdp_linked/gdp_based * 100)
+        df["Value"] = df["Value"].apply(
+            lambda x: float(x) / gdp_linked / gdp_based * 100
+        )
         return df
 
     def data_clean_by_year(self, filename, money_type="current_USD", graph=True):
