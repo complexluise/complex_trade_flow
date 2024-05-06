@@ -5,29 +5,37 @@ import streamlit as st
 
 from pandas import DataFrame
 
+st.set_page_config(
+    page_title="Diversidad Económica",
+    page_icon="🐲",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.extremelycoolapp.com/help',
+        'Report a bug': "https://www.extremelycoolapp.com/bug",
+        'About': "# This is a header. This is an *extremely* cool app!"
+    }
+)
+
 years = np.arange(1995, 2023)
 
 
 @st.cache_data
-def load_data() -> DataFrame:
+def load_data_diversity_countries() -> DataFrame:
     ruta_datos = "data/processed_data/BACI_HS92_V202401b/"
-    df_list = []
-    for year in years:
-        df = pd.read_csv(
-            ruta_datos + f"countries_diversity_HS92_Y{year}_V202401b.csv",
-            sep=",")
-        df["year"] = year
-        df.drop(
-            labels="Unnamed: 0",
-            axis=1,
-            inplace=True
-        )
-        df_list.append(df)
+    df = pd.read_csv(
+        ruta_datos + f"countries_diversity_HS92_V202401b.csv",
+        sep=",")
+    df.drop(
+        labels="Unnamed: 0",
+        axis=1,
+        inplace=True
+    )
 
-    return pd.concat(df_list)
+    return df
 
 
-df_diversidad_paises = load_data()
+df_diversidad_paises = load_data_diversity_countries()
 
 
 def filter_dataframe(df, year):
@@ -55,4 +63,4 @@ def update_figure(year):
 st.title("Diversidad de Exportaciones e Importaciones")
 year = st.selectbox("Seleccione un año:", years)
 fig = update_figure(year)
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, height=1200)
