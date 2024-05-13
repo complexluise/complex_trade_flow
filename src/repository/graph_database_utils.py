@@ -1,60 +1,73 @@
 class Neo4jQueryManager:
-
     @staticmethod
-    def find_trades() -> str:
+    def add_country():
         return """
-        MATCH (c:Country {iso3: $iso3})-[r:EXPORTS_TO]->(other)
-        RETURN other.iso3 AS country, r.product_category AS product, r.year AS year, r.value AS value, r.quantity AS quantity
-        """
-
-    @staticmethod
-    def get_trading_partners() -> str:
-        """
-        Retrieves all trading partners for a given country.
-
-        Args:
-        country_iso3 (str): The ISO3 code of the country.
-
-        Returns:
-        list of dicts: Trading partners and the details of the trades.
-        """
-        return """
-        MATCH (c:Country {iso3: $iso3})-[r:EXPORTS_TO]->(partner:Country)
-        RETURN partner.name AS partner_country, collect({product_category: r.product_category, year: r.year, value: r.value, quantity: r.quantity}) AS trades
+        MERGE (c:Country {id: $id})
+        ON CREATE SET c.iso2 = $iso2, c.name = $name, c.capital_city = $capital_city,
+                      c.longitude = $longitude, c.latitude = $latitude
+        ON MATCH SET c.iso2 = $iso2, c.name = $name, c.capital_city = $capital_city,
+                     c.longitude = $longitude, c.latitude = $latitude
         """
 
     @staticmethod
-    def summarize_trade_by_product() -> str:
-        """
-        Summarizes trade values by product categories for a given country.
-
-        Args:
-        country_iso3 (str): The ISO3 code of the country.
-
-        Returns:
-        list of dicts: Sum of values and quantities grouped by product categories.
-        """
+    def create_or_merge_region():
         return """
-        MATCH (c:Country {iso3: $iso3})-[r:EXPORTS_TO]->(partner:Country)
-        RETURN r.product_category AS product_category, sum(r.value) AS total_value, sum(r.quantity) AS total_quantity
-        GROUP BY r.product_category
-        ORDER BY total_value DESC
+        // Merge the region node and create or update its properties
+        MERGE (r:Region {id: $id})
+        ON CREATE SET r.iso2code = $iso2code, r.value = $value
+        ON MATCH SET r.iso2code = $iso2code, r.value = $value
+        
+        // Establish a relationship from Country to Region
+        // Assumes $country_id is provided correctly referencing an existing Country node
+        MERGE (c:Country {id: $country_id})
+        MERGE (c)-[:BELONGS_TO]->(r)
         """
 
     @staticmethod
-    def get_country_trade_volume() -> str:
-        """
-        Retrieves the total trade volume for all countries for a given year.
-
-        Args:
-        year (int): The year of the trade.
-
-        Returns:
-        list of dicts: Countries and their total trade volume in the given year.
-        """
+    def create_or_merge_admin_region():
         return """
-        MATCH (c:Country)-[r:EXPORTS_TO {year: $year}]->(partner:Country)
-        RETURN c.name AS country, sum(r.value) AS total_exports
-        GROUP BY c.name
-        ORDER BY total_exports DESC
+        // Merge the admin region node and create or update its properties
+        MERGE (ar:AdminRegion {id: $id})
+        ON CREATE SET ar.iso2code = $iso2code, ar.value = $value
+        ON MATCH SET ar.iso2code = $iso2code, ar.value = $value
+
+        // Establish a relationship from Country to AdminRegion
+        // Assumes $country_id is provided correctly referencing an existing Country node
+        MERGE (c:Country {id: $country_id})
+        MERGE (c)-[:HAS_ADMIN_REGION]->(ar)
+        """
+
+    @staticmethod
+    def create_or_merge_income_level():
+        return """
+        // Merge the admin region node and create or update its properties
+        MERGE (il:IncomeLevel {id: $id})
+        ON CREATE SET il.iso2code = $iso2code, il.value = $value
+        ON MATCH SET il.iso2code = $iso2code, il.value = $value
+
+        // Establish a relationship from Country to Income Level
+        // Assumes $country_id is provided correctly referencing an existing Country node
+        MERGE (c:Country {id: $country_id})
+        MERGE (c)-[:HAS_INCOME]->(il)
+        """
+
+    @staticmethod
+    def create_or_merge_lending_type():
+        return """
+        // Merge the lending type node and create or update its properties
+        MERGE (lt:LendingType {id: $id})
+        ON CREATE SET lt.iso2code = $iso2code, lt.value = $value
+        ON MATCH SET lt.iso2code = $iso2code, lt.value = $value
+
+        // Establish a relationship from Country to Lending Type
+        // Assumes $country_id is provided correctly referencing an existing Country node
+        MERGE (c:Country {id: $country_id})
+        MERGE (c)-[:HAS_LENDING]->(lt)
+        """
+
+    @staticmethod
+    def create_trade_data():
+        return """
+        MERGE (exporter)-[trade:EXPORTS_TO {year: row.year}]->(importer)
+        ON CREATE SET trade.money = toFloat(row.money), trade.mass = toFloat(row.mass);
         """
