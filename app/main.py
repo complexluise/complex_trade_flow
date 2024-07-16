@@ -48,9 +48,15 @@ def filter_dataframe(df, year):
 
 def update_figure(year):
     filtered_df = filter_dataframe(df_diversidad_paises, year)
-    fig = px.scatter(filtered_df, x="export_product_diversity", y="import_product_diversity", marginal_y="violin", color='is_latinoamerica',
-                     marginal_x="histogram", trendline="ols", template="simple_white", title='Diversidad de exportaciones e importaciones - {}'.format(year),
-                     hover_data='countries')
+
+    fig = px.scatter(filtered_df, x="export_product_diversity", y="import_product_diversity", marginal_y="violin",
+                     color='is_latinoamerica', marginal_x="histogram", trendline="ols", template="simple_white",
+                     title='Diversidad de exportaciones e importaciones - {}'.format(year), hover_data='countries',
+                     labels={
+                         "export_product_diversity": "Diversidad de exportación de productos",
+                         "import_product_diversity": "Diversidad de importación de productos"
+                     }
+                     )
 
     fig.update_layout(
         font_family="Arial",
@@ -60,7 +66,8 @@ def update_figure(year):
         title_font_color="black",
         legend_title_font_color="black",
         xaxis=dict(range=[0, 1200]),
-        yaxis=dict(range=[0, 1500])
+        yaxis=dict(range=[0, 1500]),
+
     )
     fig.update_xaxes(title_font_family="Arial")
     return fig
