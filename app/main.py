@@ -1,6 +1,5 @@
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 import streamlit as st
 
@@ -81,12 +80,9 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.title("Diversidad a lo largo de tiempo Latinoamerica y Mundo")
 df_melted = df_diversidad_tiempo.melt(id_vars=["tiempo"], var_name="Variable", value_name="Valor")
-# Máscara aplicada para excluir las diversidades de importación
-mask = ~df_melted["Variable"].isin(["import_diversity_w", "import_diversity_lan"])
-df_filtered = df_melted[mask]
 
 # Creamos el gráfico interactivo
-fig_2 = px.line(df_melted[mask], x="tiempo", y="Valor", color="Variable",
+fig_2 = px.line(df_melted, x="tiempo", y="Valor", color="Variable",
               title="Diversidad de Importaciones y Exportaciones a lo Largo del Tiempo",
               labels={"Valor": "Diversidad", "tiempo": "Año"})
 
@@ -95,14 +91,7 @@ fig_2.update_layout(
     template="plotly_white",
     xaxis_title="Año",
     yaxis_title="Diversidad",
-    legend_title="Indicadores",
-    font=dict(size=12),
-    hovermode="x unified",
-    xaxis=dict(
-        tickmode='linear',
-        tick0=0.5,
-        dtick=0.75
-    )
+    legend_title="Indicadores"
 )
 
 st.plotly_chart(fig_2, use_container_width=True)
