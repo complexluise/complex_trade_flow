@@ -99,8 +99,9 @@ fig_2.update_layout(
     font=dict(size=12),
     hovermode="x unified",
     xaxis=dict(
-        dtick="M10",  # Mostrar cada 5 años
-        tickformat="%Y"  # Formato de año
+        tickmode='linear',
+        tick0=0.5,
+        dtick=0.75
     )
 )
 
