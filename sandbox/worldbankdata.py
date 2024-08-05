@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # Input counties list, data indicator and dates
 
-    countrys = df_country["id"].to_list()
+    countries = df_country["id"].to_list()
     indicators = [
         # {"indicator_code": 'NE.IMP.GNFS.ZS',
         # "description":"Import of goods and services (% of GDP)"},
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     for indicator in indicators:
         df_list = []
-        for country in countrys:
+        for country in countries:
             print("Getting data for country: ", country)
             try:
                 df = get_indicator_data_country(
