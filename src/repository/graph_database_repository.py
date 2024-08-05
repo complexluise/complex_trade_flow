@@ -1,47 +1,65 @@
-from py2neo import Graph, Node, Relationship
+import os
+from neo4j import GraphDatabase
+from dotenv import load_dotenv
 
-from src.repository.graph_database_repository import Neo4jQueryManager
+from src.models.pydantic_models import Country, HarmonizedCategory
+from src.repository.graph_database_utils import Neo4jQueryManager
+
+load_dotenv()
 
 
 class GraphDatabaseRepository:
-    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="test"):
-        self.graph = Graph(uri, auth=(user, password))
+    def __init__(self,
+                 uri=os.getenv("NEO4J_URI"),
+                 user=os.getenv("NEO4J_USERNAME"),
+                 password=os.getenv("NEO4J_PASSWORD")
+                 ):
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
-    def add_country(self, iso3: str, name: str):
-        country = Node("Country", iso3=iso3, name=name)
-        self.graph.merge(country, "Country", "iso3")
+    def _execute_query(self, query: str, parameters=None):
+        with self.driver.session() as session:
+            session.write_transaction(lambda tx: tx.run(query, parameters))
 
-    def add_trade_relation(
-        self,
-        exporter_iso3: str,
-        importer_iso3: str,
-        product_category: str,
-        year: int,
-        value: float,
-        quantity: float,
-    ):
-        exporter = Node("Country", iso3=exporter_iso3)
-        importer = Node("Country", iso3=importer_iso3)
-        relationship = Relationship(
-            exporter,
-            "EXPORTS_TO",
-            importer,
-            product_category=product_category,
-            year=year,
-            value=value,
-            quantity=quantity,
-        )
-        self.graph.merge(relationship, "EXPORTS_TO", "product_category", "year")
+    def _add_country(self, country: Country):
+        query = Neo4jQueryManager.add_country()
+        self._execute_query(query, country.dict())
 
-    def find_trades(self, iso3: str):
-        return self.graph.run(Neo4jQueryManager.find_trades, iso3=iso3).data()
+    def _create_or_merge_region(self, country: Country):
+        if country.region:
+            params = {**country.region.dict(), "country_id": country.id}
+            query = Neo4jQueryManager.create_or_merge_region()
+            self._execute_query(query, params)
+
+    def _create_or_merge_admin_region(self, country: Country):
+        if country.admin_region.id:
+            params = {**country.admin_region.dict(), "country_id": country.id}
+            query = Neo4jQueryManager.create_or_merge_admin_region()
+            self._execute_query(query, params)
+
+    def _create_or_merge_income_level(self, country: Country):
+        if country.income_level.id:
+            params = {**country.income_level.dict(), "country_id": country.id}
+            query = Neo4jQueryManager.create_or_merge_income_level()
+            self._execute_query(query, params)
+
+    def _create_or_merge_lending_type(self, country: Country):
+        if country.lending_type.id:
+            params = {**country.lending_type.dict(), "country_id": country.id}
+            query = Neo4jQueryManager.create_or_merge_lending_type()
+            self._execute_query(query, params)
+
+    def add_country(self, country: Country):
+        self._add_country(country)
+        self._create_or_merge_region(country)
+        # Only Region
+        #self._create_or_merge_admin_region(country)
+        #self._create_or_merge_income_level(country)
+        #self._create_or_merge_lending_type(country)
+
+    def add_product(self, product: HarmonizedCategory):
+        pass
 
 
-# Usage of the repository
-if __name__ == "__main__":
-    repo = GraphDatabaseRepository()
-    repo.add_country("USA", "United States of America")
-    repo.add_country("CAN", "Canada")
-    repo.add_trade_relation("USA", "CAN", "Electronics", 2021, 500000, 400)
 
-    print(repo.find_trades("USA"))
+    def close(self):
+        self.driver.close()

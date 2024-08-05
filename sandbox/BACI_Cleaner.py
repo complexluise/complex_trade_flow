@@ -197,7 +197,7 @@ class BACI_Cleaner:
         return cummulative_inflation
 
     def get_gdp_linked(self, year, country="USA"):
-        # country is USA due to Values are in thousand of US in for all countrys
+        # country is USA due to Values are in thousand of US in for all countries
 
         # Obtiene el deflactor de gdp para un año
         bool_mask = (self.df_gdp_linked["countryiso3code"] == country) & (
