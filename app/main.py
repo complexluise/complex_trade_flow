@@ -74,7 +74,7 @@ def update_figure(year):
     return fig
 
 
-def diversity_over_time_plot(df):
+def diversity_over_time_plot(df, diversity_type):
     color_palette = {
         'Latin America & Caribbean ': '#1f77b4',
         'Aggregates': '#ff7f0e',
@@ -93,32 +93,32 @@ def diversity_over_time_plot(df):
     for region in df['region'].unique():
         region_data = df[df['region'] == region]
 
-        # Export diversity
-        fig.add_trace(go.Scatter(
-            x=region_data['year'],
-            y=region_data['export_product_diversity'],
-            mode='lines',
-            name=f'{region} - Export',
-            line=dict(color=color_palette[region], dash='solid'),
-            legendgroup=region
-        ))
+        if diversity_type in ["Both", "Export"]:
+            fig.add_trace(go.Scatter(
+                x=region_data['year'],
+                y=region_data['export_product_diversity'],
+                mode='lines',
+                name=f'{region} - Export',
+                line=dict(color=color_palette[region], dash='solid'),
+                legendgroup=region
+            ))
 
-        # Import diversity
-        fig.add_trace(go.Scatter(
-            x=region_data['year'],
-            y=region_data['import_product_diversity'],
-            mode='lines',
-            name=f'{region} - Import',
-            line=dict(color=color_palette[region], dash='dash'),
-            legendgroup=region
-        ))
+        if diversity_type in ["Both", "Import"]:
+            fig.add_trace(go.Scatter(
+                x=region_data['year'],
+                y=region_data['import_product_diversity'],
+                mode='lines',
+                name=f'{region} - Import',
+                line=dict(color=color_palette[region], dash='dash'),
+                legendgroup=region
+            ))
 
     # Update layout
     fig.update_layout(
-        title="Export and Import Product Diversity Across Regions Over Time",
-        xaxis_title="Year",
-        yaxis_title="Product Diversity",
-        legend_title="Region and Diversity Type",
+        title="Exportación e importación de la diversidad de productos a través del tiempo",
+        xaxis_title="Año",
+        yaxis_title="Diversidad de Productos",
+        legend_title="Region y tipo de diversidad",
         hovermode="closest",
         legend=dict(groupclick="toggleitem")
     )
@@ -131,13 +131,20 @@ fig = update_figure(year)
 st.plotly_chart(fig, use_container_width=True)
 
 st.title("Diversidad a lo largo de tiempo Latinoamerica y Mundo")
+
+diversity_type = st.selectbox(
+    "Choose diversity type:",
+    options=["Both", "Export", "Import"],
+    index=0  # Default to "Both"
+)
+
 df_melted = df_diversidad_tiempo.melt(
     id_vars=["year", "region"],
     value_vars=["export_product_diversity", "import_product_diversity"],
     var_name="Variable",
     value_name="Value")
 
-fig_2 = diversity_over_time_plot(df_diversidad_tiempo)
+fig_2 = diversity_over_time_plot(df_diversidad_tiempo, diversity_type)
 
 st.plotly_chart(fig_2, use_container_width=True)
 
