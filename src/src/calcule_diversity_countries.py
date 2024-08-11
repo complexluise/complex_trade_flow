@@ -12,7 +12,7 @@ from scipy import stats
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from scripts.src.constants import BACIColumnsTradeData, WBDCountry
+from src.src.constants import BACIColumnsTradeData, WBDCountry
 
 
 class TradeNetwork:
