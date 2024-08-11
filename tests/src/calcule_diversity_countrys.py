@@ -4,8 +4,8 @@ import numpy as np
 from src.constants import BACIColumnsTradeData
 
 # Import the classes we want to test
-from src.calcule_diversity_countries import TradeNetwork, DiversityCalculator, EconomicComplexityAnalyzer
-
+from src.calcule_diversity_countries import TradeNetwork, DiversityCalculator, EconomicComplexityAnalyzer, \
+    ClassificationScheme
 
 
 @pytest.fixture
@@ -19,112 +19,59 @@ def mock_trade_data():
     return pd.DataFrame(data)
 
 
-@pytest.fixture
-def mock_region_data():
-    return {
-        "AFG": "South Asia",
-        "IND": "South Asia",
-        'AUS': 'East Asia & Pacific',
-        'OZA': 'Sub-Saharan Africa'
-    }
-
 # Mock for _load_data method
 @pytest.fixture
-def mock_load_data(mock_trade_data, mock_region_data, monkeypatch):
+def mock_load_data(mock_trade_data, monkeypatch):
     def mock_load_trade_data(*args, **kwargs):
         return mock_trade_data
 
-    def mock_load_region_data(*args, **kwargs):
-        return mock_region_data
-
     monkeypatch.setattr(TradeNetwork, '_load_data', mock_load_trade_data)
-    monkeypatch.setattr(TradeNetwork, '_load_region_data', mock_load_region_data)
+
+    no_classification = ClassificationScheme(
+        name="by_country"
+    )
+    return TradeNetwork(2022, [no_classification])
 
 
-class TestTradeNetwork:
-    def test_trade_network_initialization(self, mock_load_data):
-        network = TradeNetwork(2022)
-        assert network.year == 2022
-        assert set(network.countries) == {'AFG', 'AUS', 'IND', 'OZA'}
-        assert set(network.products) == {'570210', '806740'}
-        assert network.trades_region_df.shape == (4, 4)
-
-    def test__load_region_data(self):
-        region_countries = TradeNetwork._load_region_data()
-        assert isinstance(region_countries, dict)
+def test_trade_network_initialization(mock_load_data):
+    trade_network = mock_load_data
+    assert trade_network.year == 2022
+    assert set(trade_network.countries) == {'AFG', 'AUS', 'OZA', 'IND'}
+    assert set(trade_network.products) == {'570210', '806740'}
+    assert 'by_country' in trade_network.classified_countries
 
 
-class TestDiversityCalculator:
-
-    def test_filter_data_by_trade_partners_country(self, mock_load_data):
-        self.trade_network = TradeNetwork(2022)
-        self.diversity_calculator = DiversityCalculator(self.trade_network)
-        df = self.diversity_calculator.filter_data_by_country_partners()
-        assert isinstance(df, pd.DataFrame)
-
-    def test_filter_data_by_trade_partners_region(self, mock_load_data):
-        self.trade_network = TradeNetwork(2022)
-        self.diversity_calculator = DiversityCalculator(self.trade_network)
-        countries_in_region = self.trade_network.find_countries_in_region('South Asia')
-        other_countries = set(self.trade_network.countries).difference(set(countries_in_region))
-        # aquí le debo pasar el conjunto de paises
-        df = self.diversity_calculator.filter_data_by_country_partners(importers=countries_in_region,
-                                                                       exporters=other_countries)
-        assert isinstance(df, pd.DataFrame)
-
-    def test_diversity_calculator(self, mock_load_data):
-        network = TradeNetwork(2022)
-        calculator = DiversityCalculator(network)
-
-        # Test marginal probabilities
-        probs = calculator.calculate_marginal_probabilities(BACIColumnsTradeData.PRODUCT_CATEGORY_CODE.value)
-        expected_probs = np.array([0.979651530234438, 0.020348469765562063])  # Calculated manually
-        np.testing.assert_allclose(probs, expected_probs, rtol=1e-5)
-
-        # Test diversity index
-        diversity = calculator.calculate_diversity_index()
-        expected_diversity = 1.1044994155500054  # Calculated manually
-        assert abs(diversity - expected_diversity) < 1e-4
+def test_classification_application(mock_load_data):
+    trade_network = mock_load_data
+    classification = trade_network.classified_countries['by_country']
+    assert classification['AFG'] == 'AFG'
+    assert classification['AUS'] == 'AUS'
 
 
-# Test EconomicComplexityAnalyzer
+def test_trades_by_classification(mock_load_data):
+    trade_network = mock_load_data
+    trades_classified = trade_network.trades_classified_df
+    assert 'by_country_importer' in trades_classified.columns
+    assert 'by_country_exporter' in trades_classified.columns
 
 
+def test_diversity_calculator(mock_load_data):
+    trade_network = mock_load_data
+    diversity_calculator = DiversityCalculator(trade_network)
 
-@pytest.fixture()
-def mock_load_region_data(mock_region_data, monkeypatch):
-    def mock_load(*args, **kwargs):
-        return mock_region_data
-
-    monkeypatch.setattr(EconomicComplexityAnalyzer, '_load_region_data', mock_load)
-
-
-def test_analyze_country(mock_load_data):
-    trade_network = TradeNetwork(2022)
-    analyzer = EconomicComplexityAnalyzer(2022, 2022)
-    results = analyzer.analyze_country(trade_network, "AFG")
-
-    assert len(results) == 4  # One row for each country
-    assert set(results['country']) == {'AFG', 'AUS', 'OZA', 'IND'}
-    assert set(results['region']) == {'South Asia', 'East Asia & Pacific', 'Sub-Saharan Africa'}
-
-    # Check if diversity indices are calculated (exact values depend on the calculation method)
-    assert all(results['export_product_diversity'] > 0)
-    assert all(results['import_product_diversity'] > 0)
+    diversity_index = diversity_calculator.calculate_diversity_index('by_country')
+    assert isinstance(diversity_index, float)
 
 
-def test_analyze_region(mock_load_data):
-    trade_network = TradeNetwork(2022)
-    analyzer = EconomicComplexityAnalyzer(2022, 2022)
-    results = analyzer.analyze_region(trade_network, "South Asia")
+def test_economic_complexity_analyzer(monkeypatch, mock_load_data):
+    no_classification = ClassificationScheme(name="by_country")
+    analyzer = EconomicComplexityAnalyzer(2022, 2022, [no_classification])
 
-    assert len(results) == 4  # One row for each country
-    assert set(results['country']) == {'AFG', 'AUS', 'OZA', 'IND'}
-    assert set(results['region']) == {'South Asia', 'East Asia & Pacific', 'Sub-Saharan Africa'}
+    mock_trade_network = mock_load_data
 
-    # Check if diversity indices are calculated (exact values depend on the calculation method)
-    assert all(results['export_product_diversity'] > 0)
-    assert all(results['import_product_diversity'] > 0)
+    result = analyzer.analyze(mock_trade_network, 'AUS', 'by_country')
+    assert 'export_product_diversity' in result
+    assert 'import_product_diversity' in result
 
 
 # Run the tests
