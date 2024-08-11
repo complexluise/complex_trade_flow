@@ -2,7 +2,7 @@ import pandas as pd
 
 from pandas import DataFrame
 
-from src.src.constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
+from src.constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
 
 
 class RawDataManager:

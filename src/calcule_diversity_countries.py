@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import pandas as pd
 import numpy as np
@@ -12,7 +12,7 @@ from scipy import stats
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from src.src.constants import BACIColumnsTradeData, WBDCountry
+from src.constants import BACIColumnsTradeData, WBDCountry
 
 
 class TradeNetwork:

@@ -1,10 +1,10 @@
 import pytest
 import pandas as pd
 import numpy as np
-from src.src.constants import BACIColumnsTradeData
+from src.constants import BACIColumnsTradeData
 
 # Import the classes we want to test
-from src.src.calcule_diversity_countries import TradeNetwork, DiversityCalculator, EconomicComplexityAnalyzer
+from src.calcule_diversity_countries import TradeNetwork, DiversityCalculator, EconomicComplexityAnalyzer
 
 
 
