@@ -1,7 +1,7 @@
 """This module provides the CLIController class, the entry point for the CLI, handling user commands."""
 
 import argparse
-from src.core.application_server import ApplicationServer
+from graph_db.core.application_server import ApplicationServer
 
 
 class CLIController:

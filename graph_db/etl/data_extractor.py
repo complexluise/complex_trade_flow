@@ -2,7 +2,7 @@ from csv import DictReader
 from pydantic import BaseModel
 from typing import Type
 
-from src.models.pydantic_models import (
+from graph_db.models.pydantic_models import (
     TradeData,
     Country,
     HarmonizedCategory,

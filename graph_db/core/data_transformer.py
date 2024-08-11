@@ -1,5 +1,5 @@
 from typing import List, Dict
-from src.models.pydantic_models import TradeData
+from graph_db.models.pydantic_models import TradeData
 
 
 class DataTransformer:
