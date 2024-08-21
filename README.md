@@ -89,6 +89,11 @@ EconomicComplexityAnalyzer.run_analysis(
 )
 ```
 
+
+## Contribuciones
+
+Si quieres contribuir puedes empezar solucionando los TODO en el código.
+
 ## 🙏 Agradecimientos
 
 - A BACI CEPII por proporcionar completos datos de comercio internacional.
