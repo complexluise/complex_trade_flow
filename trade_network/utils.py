@@ -21,6 +21,9 @@ class ClassificationScheme:
         self.value_column = value_column
         self.classification_data = self._load_classification_data()
 
+    def __str__(self):
+        return self.name
+
     def _load_classification_data(self) -> dict[str, str]:
         """
         Loads classification data from a CSV file, or returns an empty dictionary for NoClassification.
