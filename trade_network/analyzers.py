@@ -27,6 +27,38 @@ class EconomicComplexityAnalyzer:
             EconomicComplexity.ENTITY_PRODUCT_DIVERSIFICATION.value: self.compute_entity_product_diversification
         }
 
+    def analyze_year(self, year: int, scheme_name: str, type_analysis: EconomicComplexity) -> DataFrame:
+        network = TradeNetwork(year, self.classification_schemes)
+
+        analysis: Callable = self.analysis_dict[type_analysis.value]
+
+        results = Parallel(n_jobs=-1)(
+            delayed(analysis)(network, entity, scheme_name) for entity in
+            tqdm(network.entities[scheme_name], desc=f"Analyzing year {year}")
+        )
+
+        return pd.DataFrame(results)
+
+    def run_analysis(self, type_analysis: EconomicComplexity, output_directory: str) -> None:
+        """
+        Runs the diversity analysis for each year and classification scheme, and stores the results.
+        """
+
+        for scheme in self.classification_schemes:
+            for year in range(self.start_year, self.end_year + 1):
+                print(f"Analyzing {scheme.name} for {year}...")
+                analysis_df = self.analyze_year(year, scheme.name, type_analysis)
+                self.save_csv(analysis_df, output_directory, scheme.name, year)
+
+    @staticmethod
+    def save_csv(df, output_directory, scheme_name, year):
+        # TODO: esta función de guarado esta acoplada a la diversidad
+        output_directory = output_directory + "/diversity/"
+        os.makedirs(output_directory, exist_ok=True)
+        output_filename = f"{scheme_name}_diversity_{year}.csv"
+        df.to_csv(output_directory+output_filename, index=False)
+        print(f"Saved results to {output_directory+output_filename}")
+
     @staticmethod
     def compute_entity_product_diversification(
             trade_network: TradeNetwork,
@@ -49,33 +81,3 @@ class EconomicComplexityAnalyzer:
                 )
             ),
         }
-
-    def analyze_year(self, year: int, scheme_name: str, analysis_type: EconomicComplexity) -> DataFrame:
-        network = TradeNetwork(year, self.classification_schemes)
-
-        results = Parallel(n_jobs=-1)(
-            delayed(analysis_type)(network, entity, scheme_name) for entity in
-            tqdm(network.classified_countries[scheme_name].keys(), desc=f"Analyzing year {year}")
-        )
-
-        return pd.DataFrame(results)
-
-    def run_analysis(self, type_analysis: EconomicComplexity, output_directory: str) -> None:
-        """
-        Runs the diversity analysis for each year and classification scheme, and stores the results.
-        """
-        analysis: Callable = self.analysis_dict[type_analysis.value]
-        for scheme in self.classification_schemes:
-            for year in range(self.start_year, self.end_year + 1):
-                print(f"Analyzing {scheme.name} for {year}...")
-                analysis_df = analysis(year, scheme.name)
-                self.save_csv(analysis_df, output_directory,scheme.name, year)
-
-    @staticmethod
-    def save_csv(df, output_directory, scheme_name, year):
-        # TODO: esta función de guarado esta acoplada a la diversidad
-        output_directory = output_directory + "/diversity/"
-        os.makedirs(output_directory, exist_ok=True)
-        output_filename = f"{scheme_name}_diversity_{year}.csv"
-        df.to_csv(output_directory+output_filename, index=False)
-        print(f"Saved results to {output_directory+output_filename}")
