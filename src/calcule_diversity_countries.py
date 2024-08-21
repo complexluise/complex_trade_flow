@@ -200,13 +200,19 @@ class DiversityCalculator:
 
 
 class EconomicComplexityAnalyzer:
+    """
+    TODO: algunas cosas acopladas como los directorios
+    """
     def __init__(self, start_year: int, end_year: int, classification_schemes: list[ClassificationScheme]):
         self.start_year = start_year
         self.end_year = end_year
         self.classification_schemes = classification_schemes
+        self.analysis_dict = {
+            "compute_entity_product_diversification": self.compute_entity_product_diversification
+        }
 
     @staticmethod
-    def analyze(trade_network: TradeNetwork, entity: str, scheme_name: str) -> dict:
+    def compute_entity_product_diversification(trade_network: TradeNetwork, entity: str, scheme_name: str) -> dict:
         calculator = DiversityCalculator(trade_network)
 
         all_entities = trade_network.classified_countries[scheme_name].keys()
@@ -221,33 +227,35 @@ class EconomicComplexityAnalyzer:
             "import_product_diversity": calculator.calculate_diversity_index(
                 scheme_name=scheme_name,
                 importers=[entity],
-                exporters = all_entities
+                exporters=all_entities
             ),
         }
 
-    def analyze_year(self, year: int, scheme_name: str) -> DataFrame:
+    def analyze_year(self, year: int, scheme_name: str, analysis_type) -> DataFrame:
         network = TradeNetwork(year, self.classification_schemes)
 
         results = Parallel(n_jobs=-1)(
-            delayed(self.analyze)(network, entity, scheme_name) for entity in
+            delayed(analysis_type)(network, entity, scheme_name) for entity in
             tqdm(network.classified_countries[scheme_name].keys(), desc=f"Analyzing year {year}")
         )
 
         return pd.DataFrame(results)
 
-    def run_analysis(self) -> None:
+    def run_analysis(self, type_analysis: str, output_directory: str) -> None:
         """
         Runs the diversity analysis for each year and classification scheme, and stores the results.
         """
+        analysis = self.analysis_dict[type_analysis]
         for scheme in self.classification_schemes:
             for year in range(self.start_year, self.end_year + 1):
                 print(f"Analyzing {scheme.name} for {year}...")
-                analysis_df = self.analyze_year(year, scheme.name)
-                self.save_csv(analysis_df, scheme.name, year)
+                analysis_df = analysis(year, scheme.name)
+                self.save_csv(analysis_df, output_directory,scheme.name, year)
 
     @staticmethod
-    def save_csv(df, scheme_name, year):
-        output_directory = f"data/processed_data/{scheme_name}_diversity/"
+    def save_csv(df, output_directory, scheme_name, year):
+        # TODO: esta función de guarado esta acoplada a la diversidad
+        output_directory = output_directory + "/diversity/"
         os.makedirs(output_directory, exist_ok=True)
         output_filename = f"{scheme_name}_diversity_{year}.csv"
         df.to_csv(output_directory+output_filename, index=False)
@@ -269,4 +277,6 @@ if __name__ == "__main__":
     )
 
     analyzer = EconomicComplexityAnalyzer(1995, 1996, classification_schemes=[region_scheme])
-    analyzer.run_analysis()
+    analyzer.run_analysis(
+        output_directory=f"data/processed_data/{region_scheme}/diversity/"
+    )
