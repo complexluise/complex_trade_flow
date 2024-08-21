@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 
+from collections.abc import Callable
 from pandas import DataFrame
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -22,23 +23,27 @@ class EconomicComplexityAnalyzer:
         self.start_year = start_year
         self.end_year = end_year
         self.classification_schemes = classification_schemes
-        self.analysis_dict = {
+        self.analysis_dict: dict[EconomicComplexity, Callable] = {
             EconomicComplexity.ENTITY_PRODUCT_DIVERSIFICATION.value: self.compute_entity_product_diversification
         }
 
     @staticmethod
-    def compute_entity_product_diversification(trade_network: TradeNetwork, entity: str, scheme_name: str) -> dict:
+    def compute_entity_product_diversification(
+            trade_network: TradeNetwork,
+            entity: str,
+            scheme_name: str
+    ) -> dict:
         calculator = DiversityCalculator()
         return {
             scheme_name: entity,
             "export_product_diversity": calculator.calculate_diversity_index(
-                data=trade_network.filter_data_by_classification(
+                data=trade_network.filter_data_by_entities(
                             scheme_name=scheme_name,
                             exporters=[entity]
                         )
             ),
             "import_product_diversity": calculator.calculate_diversity_index(
-                data=trade_network.filter_data_by_classification(
+                data=trade_network.filter_data_by_entities(
                     scheme_name=scheme_name,
                     importers=[entity],
                 )
@@ -55,11 +60,11 @@ class EconomicComplexityAnalyzer:
 
         return pd.DataFrame(results)
 
-    def run_analysis(self, type_analysis: str, output_directory: str) -> None:
+    def run_analysis(self, type_analysis: EconomicComplexity, output_directory: str) -> None:
         """
         Runs the diversity analysis for each year and classification scheme, and stores the results.
         """
-        analysis = self.analysis_dict[type_analysis]
+        analysis: Callable = self.analysis_dict[type_analysis.value]
         for scheme in self.classification_schemes:
             for year in range(self.start_year, self.end_year + 1):
                 print(f"Analyzing {scheme.name} for {year}...")
