@@ -63,3 +63,28 @@ class TradeNetwork:
             ].map(classified_countries.get)
 
         return classified_trade_data
+
+    def filter_data_by_entities(self, scheme_name: str, importers=None, exporters=None):
+        """
+        Filters trade data based on specified importer and exporter classifications.
+        Pro defecto importers y exportes traen todas las entidades
+
+        Args:
+            scheme_name (str): The name of the classification scheme to use.
+            importers (list, optional): List of importer classifications. Defaults to None.
+            exporters (list, optional): List of exporter classifications. Defaults to None.
+
+        Returns:
+            DataFrame: Filtered trade data based on the specified classifications.
+        """
+        importers = importers or self.classified_countries[scheme_name].keys()
+        exporters = exporters or self.classified_countries[scheme_name].keys()
+        return self.trade_data_classified[
+            (
+                self.trade_data_classified[f"{scheme_name}_importer"].isin(importers)
+            )
+            & (
+                self.trade_data_classified[f"{scheme_name}_exporter"].isin(exporters)
+            )
+            ]
+
