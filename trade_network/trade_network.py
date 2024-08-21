@@ -1,4 +1,5 @@
-from typing import Optional
+from collections import defaultdict
+from typing import Optional, Dict, Any
 import pandas as pd
 
 from .constants import BACIColumnsTradeData
@@ -20,6 +21,7 @@ class TradeNetwork:
         self.products: set[str] = set(self.trade_data[BACIColumnsTradeData.PRODUCT_CATEGORY_CODE.value])
         self.classification_schemes = classification_schemes
         self.classified_countries = self._apply_classifications()
+        self.entities = self._get_entities(self.classified_countries)
         self.trade_data_classified = self._classify_trade_data()
 
     def _load_trade_data(self) -> pd.DataFrame:
@@ -77,8 +79,8 @@ class TradeNetwork:
         Returns:
             DataFrame: Filtered trade data based on the specified classifications.
         """
-        importers = importers or self.classified_countries[scheme_name].keys()
-        exporters = exporters or self.classified_countries[scheme_name].keys()
+        importers = importers or self.entities[scheme_name]
+        exporters = exporters or self.entities[scheme_name]
         return self.trade_data_classified[
             (
                 self.trade_data_classified[f"{scheme_name}_importer"].isin(importers)
@@ -88,3 +90,12 @@ class TradeNetwork:
             )
             ]
 
+    @staticmethod
+    def _get_entities(first_dict: dict[str, dict[str, str]]) -> dict[str, set]:
+        inverted_dict = defaultdict(set)
+
+        for main_key in first_dict.keys():
+            second_dict = first_dict[main_key]
+            inverted_dict[main_key] = set(second_dict.values())
+
+        return dict(inverted_dict)
