@@ -13,6 +13,8 @@
 - **Clasificación Flexible**: Agrupa países según varios esquemas (región, nivel de ingresos, etc.)
 - **Complejidad Económica**: Analiza métricas de complejidad de productos y países
 
+También contamos con una app en Streamlit para analizar la diversidad económica. Puedes explorarla en [este enlace](https://diversidad-economica.streamlit.app/).
+
 ## 🛠 Instalación
 
 ```bash
