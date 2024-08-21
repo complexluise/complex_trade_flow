@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+class EconomicComplexity(Enum):
+    ENTITY_PRODUCT_DIVERSIFICATION = "compute_entity_product_diversification"
+
+
 class BACIColumnsTradeData(Enum):
     YEAR = "year"
     EXPORTER_ISO_CODE_3 = "exporter_iso_code_3"
