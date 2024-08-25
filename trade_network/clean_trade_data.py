@@ -1,10 +1,9 @@
 import json
 import pandas as pd
+import os
 
 from pandas import DataFrame
-
-with open("./trade_network/data_paths.json") as file:
-    paths = json.load(file)
+from .constants import BACIColumnsTradeData, CountryCodes, WBDGDPDeflator
 
 
 class RawDataManager:
@@ -13,17 +12,20 @@ class RawDataManager:
         self.year = year
 
         self.transaction_data = pd.read_csv(
-            paths["raw_data_dir"] + f"BACI_HS92_Y{year}_V202401b.csv",
+            os.getenv("RAW_DATA_DIR") + f"BACI_HS92_Y{year}_V202401b.csv",
             sep=","
         )
+
         self.country_data = pd.read_csv(
-            paths["raw_data_dir"] + "country_codes_V202401b.csv"
+            os.getenv("RAW_DATA_DIR") + "country_codes_V202401b.csv"
         )
+
         # Countries location region
-        self.wbd_countries = pd.read_csv(paths["wbd_countries"])
+        self.wbd_countries = pd.read_csv(os.getenv("WBD_COUNTRIES"))
+
         # GDP deflator: linked series (base year varies by country), use dtype="string" to avoid unicodeerror
         self.gdp_deflator = pd.read_csv(
-            paths["wbd_gdp_deflator"],
+            os.getenv("WBD_GDP_DEFLATOR"),
             dtype="string"
         )
 
