@@ -2,8 +2,6 @@ import json
 import pandas as pd
 
 from pandas import DataFrame
-from pathlib import Path
-from .constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
 
 with open("./trade_network/data_paths.json") as file:
     paths = json.load(file)
@@ -11,6 +9,7 @@ with open("./trade_network/data_paths.json") as file:
 
 class RawDataManager:
     def __init__(self, year):
+
         self.year = year
 
         self.transaction_data = pd.read_csv(
@@ -27,18 +26,6 @@ class RawDataManager:
             paths["wbd_gdp_deflator"],
             dtype="string"
         )
-
-        self.enriched_country_data = self.enrich()
-
-    def enrich(self):
-        enriched = self.country_data.merge(
-            self.wbd_countries,
-            how="left",
-            left_on=CountryCodes.ISO_CODE_3.value,
-            right_on=WBDCountry.ISO_CODE_3.value,
-        )
-        enriched.drop_duplicates(subset=["country_iso3"], inplace=True)  # TODO: ¿Por qué hay duplicados?
-        return enriched
 
 
 class GDPDataHandler:
@@ -57,7 +44,7 @@ class GDPDataHandler:
         self.df_gdp = df_gdp
         self.base_year = base_year
 
-    def get_gdp_linked(self, year, country="USA"):
+    def get_gdp_linked(self, year, country="USA") -> float:
         """
         Retrieves the GDP deflator for a given year and country.
 
@@ -80,7 +67,7 @@ class GDPDataHandler:
 
     def to_constant_usd(self, df: DataFrame, year: str) -> DataFrame:
         """
-        Converts the 'Value' column of a DataFrame from current USD to constant USD using the GDP deflator.
+        Converts the 'money' column of a DataFrame from current USD to constant USD using the GDP deflator.
 
         Args:
         df (pd.DataFrame): The DataFrame containing the 'Value' column to convert.
@@ -107,7 +94,7 @@ class DataCleaner:
         transaction_data.replace({"q": "           NA"}, "0", inplace=True)
         transaction_data["q"] = transaction_data["q"].astype(float)
         country_map = pd.Series(
-            country_data[WBDCountry.ISO_CODE_3.value].values,
+            country_data[CountryCodes.ISO_CODE_3.value].values,
             index=country_data[CountryCodes.CODE.value],
         ).to_dict()
         transaction_data["i"] = transaction_data["i"].map(country_map)
@@ -138,7 +125,7 @@ class DataCleaner:
             manager = RawDataManager(year)
 
             cleaned_data: DataFrame = DataCleaner.normalize_column_names(
-                manager.transaction_data, manager.enriched_country_data
+                manager.transaction_data, manager.country_data
             )
 
             gpd_handler = GDPDataHandler(manager.gdp_deflator, base_year="2013")
