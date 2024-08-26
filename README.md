@@ -26,28 +26,28 @@ Proximamente instalación por setup o Pypi
 ## 📊 Inicio Rápido
 
 ```python
-from trade_network.trade_network import TradeNetwork
-from trade_network.utils import ClassificationScheme
-from trade_network.diversity_metrics import DiversityCalculator
+from complex_trade_flow.networks import TradeNetwork
+from complex_trade_flow.utils import ClassificationScheme
+from complex_trade_flow.diversity_metrics import DiversityCalculator
 
 # Crear un esquema de clasificación
 esquema_regional = ClassificationScheme(
-    name="by_region",
-    file_path="data/raw_data/world_bank_data/countries.csv",
-    key_column="id",
-    value_column="region.value"
+   name="by_region",
+   file_path="data/raw_data/world_bank_data/countries.csv",
+   key_column="id",
+   value_column="region.value"
 )
 
 # Inicializar la red comercial
 trade_network = TradeNetwork(
-    year=2020,
-    classification_schemes=[esquema_regional]
+   year=2020,
+   classification_schemes=[esquema_regional]
 )
 
 # Calcular la diversidad de exportación para el sur de Asia
 data = trade_network.filter_data_by_entities(
-    scheme_name=str(esquema_regional),
-    exporters=['South Asia']
+   scheme_name=str(esquema_regional),
+   exporters=['South Asia']
 )
 
 export_diversity = DiversityCalculator.calculate_diversity_index(data=data)
@@ -71,7 +71,8 @@ Antes de usar la biblioteca, asegúrate de tener los siguientes archivos de dato
 Para limpiar los datos:
 
 ```python
-from trade_network.clean_trade_data import DataCleaner
+from complex_trade_flow.clean_trade_data import DataCleaner
+
 DataCleaner.clean_trade_data()
 ```
 
@@ -80,12 +81,12 @@ DataCleaner.clean_trade_data()
 ### Análisis de Complejidad Económica
 
 ```python
-from trade_network.analyzers import EconomicComplexityAnalyzer
-from trade_network.constants import EconomicComplexity
+from complex_trade_flow.analyzers import EconomicComplexityAnalyzer
+from complex_trade_flow.constants import EconomicComplexity
 
 EconomicComplexityAnalyzer.run_analysis(
-    type_analysis=EconomicComplexity.ENTITY_PRODUCT_DIVERSIFICATION,
-    output_directory="data/processed_data/BACI_HS92_V202401b/by_region/diversity/"
+   type_analysis=EconomicComplexity.ENTITY_PRODUCT_DIVERSIFICATION,
+   output_directory="data/processed_data/BACI_HS92_V202401b/by_region/diversity/"
 )
 ```
 
