@@ -1,6 +1,10 @@
 import pandas as pd
 
 
+def append_yearly_csv():
+    pass
+
+
 class ClassificationScheme:
     """
     Handles loading and applying different classification schemes to countries.
@@ -40,6 +44,7 @@ class ClassificationScheme:
     def apply_classification(self, countries: set[str]) -> dict[str, str]:
         """
         Maps each country to its classification value or to itself if no classification is provided.
+         Si el país no está clasificado el valor obtenido es "Unknown"
 
         Args:
             countries (set[str]): A set of country codes.
@@ -50,3 +55,5 @@ class ClassificationScheme:
         if not self.file_path:
             return {country: country for country in countries}  # NoClassification behavior
         return {country: self.classification_data.get(country, 'Unknown') for country in countries}
+
+
