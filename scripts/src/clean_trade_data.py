@@ -1,12 +1,8 @@
-import json
 import pandas as pd
 
 from pandas import DataFrame
-from pathlib import Path
-from .constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
 
-with open("./trade_network/data_paths.json") as file:
-    paths = json.load(file)
+from scripts.src.constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
 
 
 class RawDataManager:
@@ -14,31 +10,57 @@ class RawDataManager:
         self.year = year
 
         self.transaction_data = pd.read_csv(
-            paths["raw_data_dir"] + f"BACI_HS92_Y{year}_V202401b.csv",
-            sep=","
+            f"data\\raw_data\BACI_HS92_V202401b\BACI_HS92_Y{year}_V202401b.csv", sep=","
         )
         self.country_data = pd.read_csv(
-            paths["raw_data_dir"] + "country_codes_V202401b.csv"
+            "data\\raw_data\BACI_HS92_V202401b\country_codes_V202401b.csv"
         )
         # Countries location region
-        self.wbd_countries = pd.read_csv(paths["wbd_countries"])
+        self.region_data = pd.read_csv("data\\raw_data\world_bank_data\countries.csv")
         # GDP deflator: linked series (base year varies by country), use dtype="string" to avoid unicodeerror
         self.gdp_deflator = pd.read_csv(
-            paths["wbd_gdp_deflator"],
-            dtype="string"
+            "data\\raw_data\\world_bank_data\\NY.GDP.DEFL.ZS.AD_1995-2023.csv", dtype="string"
         )
 
         self.enriched_country_data = self.enrich()
 
     def enrich(self):
         enriched = self.country_data.merge(
-            self.wbd_countries,
+            self.region_data,
             how="left",
             left_on=CountryCodes.ISO_CODE_3.value,
             right_on=WBDCountry.ISO_CODE_3.value,
         )
-        enriched.drop_duplicates(subset=["country_iso3"], inplace=True)  # TODO: ¿Por qué hay duplicados?
+        enriched.drop_duplicates(subset=["country_iso3"], inplace=True)
+        enriched["is_latinoamerica"] = enriched[
+            WBDCountry.REGION_NAME.value
+        ].str.contains("Latin America & Caribbean", case=False, na=False)
         return enriched
+
+
+class DataCleaner:
+    @staticmethod
+    def clean_transaction_data(transaction_data, country_data) -> DataFrame:
+        transaction_data.replace({"q": "           NA"}, "0", inplace=True)
+        transaction_data["q"] = transaction_data["q"].astype(float)
+        country_map = pd.Series(
+            country_data[WBDCountry.ISO_CODE_3.value].values,
+            index=country_data[CountryCodes.CODE.value],
+        ).to_dict()
+        transaction_data["i"] = transaction_data["i"].map(country_map)
+        transaction_data["j"] = transaction_data["j"].map(country_map)
+        transaction_data.rename(
+            columns={
+                "t": BACIColumnsTradeData.YEAR.value,
+                "i": BACIColumnsTradeData.EXPORTER_ISO_CODE_3.value,
+                "j": BACIColumnsTradeData.IMPORTER_ISO_CODE_3.value,
+                "k": BACIColumnsTradeData.PRODUCT_CATEGORY_CODE.value,
+                "v": BACIColumnsTradeData.MONEY.value,
+                "q": BACIColumnsTradeData.MASS.value,
+            },
+            inplace=True,
+        )
+        return transaction_data
 
 
 class GDPDataHandler:
@@ -101,51 +123,30 @@ class GDPDataHandler:
         return df
 
 
-class DataCleaner:
+class DataExporter:
     @staticmethod
-    def normalize_column_names(transaction_data, country_data) -> DataFrame:
-        transaction_data.replace({"q": "           NA"}, "0", inplace=True)
-        transaction_data["q"] = transaction_data["q"].astype(float)
-        country_map = pd.Series(
-            country_data[WBDCountry.ISO_CODE_3.value].values,
-            index=country_data[CountryCodes.CODE.value],
-        ).to_dict()
-        transaction_data["i"] = transaction_data["i"].map(country_map)
-        transaction_data["j"] = transaction_data["j"].map(country_map)
-        transaction_data.rename(
-            columns={
-                "t": BACIColumnsTradeData.YEAR.value,
-                "i": BACIColumnsTradeData.EXPORTER_ISO_CODE_3.value,
-                "j": BACIColumnsTradeData.IMPORTER_ISO_CODE_3.value,
-                "k": BACIColumnsTradeData.PRODUCT_CATEGORY_CODE.value,
-                "v": BACIColumnsTradeData.MONEY.value,
-                "q": BACIColumnsTradeData.MASS.value,
-            },
-            inplace=True,
+    def export_data(data, filename):
+        data.to_csv(filename)
+
+
+def clean_trade_data():
+
+    years = [str(year) for year in range(1995, 2022 + 1)]
+
+    for year in years:
+        print("Processing year = ", year)
+
+        manager = RawDataManager(year)
+
+        cleaned_data: DataFrame = DataCleaner.clean_transaction_data(
+            manager.transaction_data, manager.enriched_country_data
         )
-        return transaction_data
 
-    @staticmethod
-    def clean_trade_data():
-        """
-        TODO: use Parallel to optimize time execution
-        """
-        years = [str(year) for year in range(1995, 2022 + 1)]
+        gpd_handler = GDPDataHandler(manager.gdp_deflator, base_year="2013")
+        data_corrected = gpd_handler.to_constant_usd(cleaned_data, year)
 
-        for year in years:
-            print("Processing year = ", year)
+        DataExporter.export_data(data_corrected, f"data\processed_data\BACI_HS92_V202401b\cleaned_trade_data\cleaned_HS92_Y{year}_V202401b.csv")
 
-            manager = RawDataManager(year)
 
-            cleaned_data: DataFrame = DataCleaner.normalize_column_names(
-                manager.transaction_data, manager.enriched_country_data
-            )
-
-            gpd_handler = GDPDataHandler(manager.gdp_deflator, base_year="2013")
-            data_corrected = gpd_handler.to_constant_usd(cleaned_data, year)
-
-            data_corrected.to_csv(
-                paths["cleaned_data_dir"] + f"cleaned_HS92_Y{year}_V202401b.csv",
-                index=False
-            )
-
+if __name__ == "__main__":
+    clean_trade_data()

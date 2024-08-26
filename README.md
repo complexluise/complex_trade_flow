@@ -1,105 +1,33 @@
-# 🌍 trade_network: Desentrañando las Complejidades del Comercio Global
+# Flujos_Diversidad_Comercio_Internacional
+# Sistema de Análisis de Datos Comerciales con Grafos
 
-![Versión de Python](https://img.shields.io/badge/python-3.7%2B-blue)
-![Licencia](https://img.shields.io/badge/license-MIT-green)
+Este proyecto implementa un sistema completo para la extracción, transformación, carga (ETL), análisis y visualización de datos comerciales utilizando una base de datos de grafos Neo4j. El objetivo es analizar la balanza de poder y las estructuras centro-periferia en los datos comerciales globales, proporcionando herramientas de visualización para interpretar estos análisis.
 
-`trade_network` es una poderosa biblioteca de Python diseñada para limpiar y analizar la compleja red del comercio internacional.
+## Características
 
-## 🚀 Funcionalidades
+- **Extracción de Datos**: Automatiza la extracción de datos desde la base de datos BACII y la API del Banco Mundial.
+- **Procesamiento ETL**: Transforma y carga los datos en Neo4j para un análisis eficiente con grafos.
+- **Análisis de Grafos**: Calcula métricas como centralidad, detecta comunidades y encuentra caminos mínimos.
+- **Visualización de Datos**: Genera visualizaciones interactivas de grafos y estadísticas para facilitar la interpretación de los datos.
 
-- **Limpieza de Datos**: Procesa fácilmente los datos crudos de BACI CEPII y del Banco Mundial
-- **Creación de Redes**: Construye redes comercio internacional para años específicos
-- **Análisis de Diversidad**: Calcula la diversidad de exportaciones e importaciones utilizando la entropía de Shannon
-- **Clasificación Flexible**: Agrupa países según varios esquemas (región, nivel de ingresos, etc.)
-- **Complejidad Económica**: Analiza métricas de complejidad de productos y países
+## Tecnologías Utilizadas
 
-También contamos con una app en Streamlit para analizar la diversidad económica. Puedes explorarla en [este enlace](https://diversidad-economica.streamlit.app/).
+- **Python**: Lenguaje de programación principal.
+- **Neo4j**: Base de datos de grafos para almacenamiento y análisis.
+- **Py2neo**: Biblioteca Python para interactuar con Neo4j.
+- **NetworkX**: Usado para cálculos adicionales de teoría de grafos.
+- **Pandas**: Para la manipulación y transformación de datos.
+- **Matplotlib/Plotly**: Para la creación de visualizaciones gráficas.
+- **Flask/Django**: Para implementar la interfaz de usuario web (opcional).
 
-## 🛠 Instalación
+## Estructura del Proyecto
 
-```bash
-git clone https://github.com/complexluise/Flujos_Diversidad_Comercio_Internacional.git
-```
-
-Proximamente instalación por setup o Pypi
-
-## 📊 Inicio Rápido
-
-```python
-from trade_network.trade_network import TradeNetwork
-from trade_network.utils import ClassificationScheme
-from trade_network.diversity_metrics import DiversityCalculator
-
-# Crear un esquema de clasificación
-esquema_regional = ClassificationScheme(
-    name="by_region",
-    file_path="data/raw_data/world_bank_data/countries.csv",
-    key_column="id",
-    value_column="region.value"
-)
-
-# Inicializar la red comercial
-trade_network = TradeNetwork(
-    year=2020,
-    classification_schemes=[esquema_regional]
-)
-
-# Calcular la diversidad de exportación para el sur de Asia
-data = trade_network.filter_data_by_entities(
-    scheme_name=str(esquema_regional),
-    exporters=['South Asia']
-)
-
-export_diversity = DiversityCalculator.calculate_diversity_index(data=data)
-print(f"Diversidad de productos de exportación para el sur de Asia: {export_diversity:.2f}")
-```
-
-## 🧹 Limpieza de Datos
-
-Antes de usar la biblioteca, asegúrate de tener los siguientes archivos de datos:
-
-1. BACI CEPII: Datos de comercio internacional
-   - Ubicación: `data/raw_data/BACI_HS92_V202401b/`
-   - Archivos: `BACI_HS92_Y{year}_V202401b.csv` para cada año
-   - Archivo de códigos de países: `country_codes_V202401b.csv`
-
-2. Datos del Banco Mundial:
-   - Ubicación: `data/raw_data/world_bank_data/`
-   - Archivo de países: `countries.csv`
-   - Archivo del deflactor del PIB: `NY.GDP.DEFL.ZS.AD_1995-2023.csv`
-
-Para limpiar los datos:
-
-```python
-from trade_network.clean_trade_data import DataCleaner
-DataCleaner.clean_trade_data()
-```
-
-## 🧮 Análisis Avanzado
-
-### Análisis de Complejidad Económica
-
-```python
-from trade_network.analyzers import EconomicComplexityAnalyzer
-from trade_network.constants import EconomicComplexity
-
-EconomicComplexityAnalyzer.run_analysis(
-    type_analysis=EconomicComplexity.ENTITY_PRODUCT_DIVERSIFICATION,
-    output_directory="data/processed_data/BACI_HS92_V202401b/by_region/diversity/"
-)
-```
-
-
-## Contribuciones
-
-Si quieres contribuir puedes empezar solucionando los TODO en el código.
-
-## 🙏 Agradecimientos
-
-- A BACI CEPII por proporcionar completos datos de comercio internacional.
-- Al Banco Mundial por indicadores económicos adicionales.
-- A GEINCyR por brindar un espacio de aprendizajes y discusión de la complejidad no solo desde un punto de vista técnico sino como un cambio de visión de mundo
-
----
-
-Construido con 💖 por entusiastas del comercio para entusiastas del comercio. ¡Feliz análisis! 🌐📈
+```plaintext
+/proyecto_analisis_grafos
+|
+|-- graph_database.py       # Define la clase GraphDatabase para interactuar con Neo4j
+|-- etl_processor.py        # Implementa la clase ETLProcessor para manejar el proceso ETL
+|-- graph_analysis_service.py # Contiene la clase GraphAnalysisService para análisis de grafos
+|-- data_visualization_system.py # Define la clase DataVisualizationSystem para visualización de datos
+|-- main.py                 # Archivo principal que configura y ejecuta todos los componentes
+|-- requirements.txt        # Dependencias de Python necesarias para ejecutar el proyecto
