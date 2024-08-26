@@ -1,6 +1,6 @@
 import networkx as nx
-from graph_db.models.pydantic_models import Country, HarmonizedCategory
-from graph_db.repository.graph_database_repository import GraphDatabaseRepository
+from src.models.pydantic_models import Country, HarmonizedCategory
+from src.repository.graph_database_repository import GraphDatabaseRepository
 
 
 class DataLoader:

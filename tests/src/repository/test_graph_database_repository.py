@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from py2neo import Graph, Node, Relationship
 
-from graph_db.repository.graph_database_repository import GraphDatabaseRepository
+from src.repository.graph_database_repository import GraphDatabaseRepository
 
 
 @pytest.fixture

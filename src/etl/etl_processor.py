@@ -1,7 +1,7 @@
 """This module contains the ETLProcessor class, which orchestrates the ETL process (Extract, Transform, Load)."""
-from graph_db.etl.data_extractor import DataExtractor
-from graph_db.etl.data_loader import DataLoader
-from graph_db.models.pydantic_models import TradeData, Country, HarmonizedCategory
+from src.etl.data_extractor import DataExtractor
+from src.etl.data_loader import DataLoader
+from src.models.pydantic_models import TradeData, Country, HarmonizedCategory
 
 
 class ETLProcessor:

@@ -1,5 +1,5 @@
 """This is the main executable script for the CLI application."""
-from graph_db.etl.etl_processor import ETLProcessor
+from src.etl.etl_processor import ETLProcessor
 
 
 def upload_countries():

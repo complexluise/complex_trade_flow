@@ -2,8 +2,8 @@ import os
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 
-from graph_db.models.pydantic_models import Country, HarmonizedCategory
-from graph_db.repository.graph_database_utils import Neo4jQueryManager
+from src.models.pydantic_models import Country, HarmonizedCategory
+from src.repository.graph_database_utils import Neo4jQueryManager
 
 load_dotenv()
 
