@@ -1,8 +1,0 @@
-{
-  "raw_data_dir": "data/raw_data/BACI_HS92_V202401b/",
-  "wbd_countries": "data/raw_data/world_bank_data/countries.csv",
-  "cleaned_data_dir": "data/processed_data/BACI_HS92_V202401b/cleaned_trade_data/",
-  "country_codes_file": "country_codes_V202401b.csv",
-  "countries_file": "countries.csv",
-  "wbd_gdp_deflator": "data/raw_data/world_bank_data/NY.GDP.DEFL.ZS.AD_1995-2023.csv"
-}
