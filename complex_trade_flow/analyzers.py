@@ -12,7 +12,7 @@ from joblib import Parallel, delayed
 from .constants import EconomicComplexity
 from .diversity_metrics import DiversityCalculator
 from .utils import ClassificationScheme
-from trade_network import TradeNetwork
+from complex_trade_flow import TradeNetwork
 
 
 class EconomicComplexityAnalyzer:

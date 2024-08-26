@@ -1,44 +1,36 @@
-import json
 import pandas as pd
+import os
 
 from pandas import DataFrame
-from pathlib import Path
-from .constants import BACIColumnsTradeData, CountryCodes, WBDCountry, WBDGDPDeflator
+from dotenv import load_dotenv
 
-with open("./trade_network/data_paths.json") as file:
-    paths = json.load(file)
+from .constants import BACIColumnsTradeData, CountryCodes, WBDGDPDeflator
+
+load_dotenv() # TODO: change dotenv
 
 
 class RawDataManager:
     def __init__(self, year):
+
         self.year = year
 
         self.transaction_data = pd.read_csv(
-            paths["raw_data_dir"] + f"BACI_HS92_Y{year}_V202401b.csv",
+            os.getenv("RAW_DATA_DIR") + f"BACI_HS92_Y{year}_V202401b.csv",
             sep=","
         )
+
         self.country_data = pd.read_csv(
-            paths["raw_data_dir"] + "country_codes_V202401b.csv"
+            os.getenv("RAW_DATA_DIR") + "country_codes_V202401b.csv"
         )
+
         # Countries location region
-        self.wbd_countries = pd.read_csv(paths["wbd_countries"])
+        self.wbd_countries = pd.read_csv(os.getenv("WBD_COUNTRIES"))
+
         # GDP deflator: linked series (base year varies by country), use dtype="string" to avoid unicodeerror
         self.gdp_deflator = pd.read_csv(
-            paths["wbd_gdp_deflator"],
+            os.getenv("WBD_GDP_DEFLATOR"),
             dtype="string"
         )
-
-        self.enriched_country_data = self.enrich()
-
-    def enrich(self):
-        enriched = self.country_data.merge(
-            self.wbd_countries,
-            how="left",
-            left_on=CountryCodes.ISO_CODE_3.value,
-            right_on=WBDCountry.ISO_CODE_3.value,
-        )
-        enriched.drop_duplicates(subset=["country_iso3"], inplace=True)  # TODO: ¿Por qué hay duplicados?
-        return enriched
 
 
 class GDPDataHandler:
@@ -57,7 +49,7 @@ class GDPDataHandler:
         self.df_gdp = df_gdp
         self.base_year = base_year
 
-    def get_gdp_linked(self, year, country="USA"):
+    def get_gdp_linked(self, year, country="USA") -> float:
         """
         Retrieves the GDP deflator for a given year and country.
 
@@ -80,7 +72,7 @@ class GDPDataHandler:
 
     def to_constant_usd(self, df: DataFrame, year: str) -> DataFrame:
         """
-        Converts the 'Value' column of a DataFrame from current USD to constant USD using the GDP deflator.
+        Converts the 'money' column of a DataFrame from current USD to constant USD using the GDP deflator.
 
         Args:
         df (pd.DataFrame): The DataFrame containing the 'Value' column to convert.
@@ -104,14 +96,21 @@ class GDPDataHandler:
 class DataCleaner:
     @staticmethod
     def normalize_column_names(transaction_data, country_data) -> DataFrame:
+        """
+        # TODO this function modify the original dataframe
+        """
+
         transaction_data.replace({"q": "           NA"}, "0", inplace=True)
         transaction_data["q"] = transaction_data["q"].astype(float)
+
         country_map = pd.Series(
-            country_data[WBDCountry.ISO_CODE_3.value].values,
+            country_data[CountryCodes.ISO_CODE_3.value].values,
             index=country_data[CountryCodes.CODE.value],
         ).to_dict()
+
         transaction_data["i"] = transaction_data["i"].map(country_map)
         transaction_data["j"] = transaction_data["j"].map(country_map)
+
         transaction_data.rename(
             columns={
                 "t": BACIColumnsTradeData.YEAR.value,
@@ -138,14 +137,14 @@ class DataCleaner:
             manager = RawDataManager(year)
 
             cleaned_data: DataFrame = DataCleaner.normalize_column_names(
-                manager.transaction_data, manager.enriched_country_data
+                manager.transaction_data, manager.country_data
             )
 
             gpd_handler = GDPDataHandler(manager.gdp_deflator, base_year="2013")
             data_corrected = gpd_handler.to_constant_usd(cleaned_data, year)
 
             data_corrected.to_csv(
-                paths["cleaned_data_dir"] + f"cleaned_HS92_Y{year}_V202401b.csv",
+                os.getenv("cleaned_data_dir") + f"cleaned_HS92_Y{year}_V202401b.csv",
                 index=False
             )
 
