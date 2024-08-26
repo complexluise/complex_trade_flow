@@ -1,17 +1,16 @@
-# 🌍 trade_network: Desentrañando las Complejidades del Comercio Global
+# 🌍 complex_trade_flow: Desentrañando las Complejidades del Comercio Global
 
 ![Versión de Python](https://img.shields.io/badge/python-3.7%2B-blue)
 ![Licencia](https://img.shields.io/badge/license-MIT-green)
 
-`trade_network` es una poderosa biblioteca de Python diseñada para limpiar y analizar la compleja red del comercio internacional.
+`complex_trade_flow` es una  biblioteca de Python diseñada para limpiar y analizar la compleja red del comercio internacional.
 
 ## 🚀 Funcionalidades
 
 - **Limpieza de Datos**: Procesa fácilmente los datos crudos de BACI CEPII y del Banco Mundial
-- **Creación de Redes**: Construye redes comercio internacional para años específicos
 - **Análisis de Diversidad**: Calcula la diversidad de exportaciones e importaciones utilizando la entropía de Shannon
 - **Clasificación Flexible**: Agrupa países según varios esquemas (región, nivel de ingresos, etc.)
-- **Complejidad Económica**: Analiza métricas de complejidad de productos y países
+
 
 También contamos con una app en Streamlit para analizar la diversidad económica. Puedes explorarla en [este enlace](https://diversidad-economica.streamlit.app/).
 
