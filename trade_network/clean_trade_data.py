@@ -1,9 +1,12 @@
-import json
 import pandas as pd
 import os
 
 from pandas import DataFrame
+from dotenv import load_dotenv
+
 from .constants import BACIColumnsTradeData, CountryCodes, WBDGDPDeflator
+
+load_dotenv() # TODO: change dotenv
 
 
 class RawDataManager:
@@ -93,14 +96,21 @@ class GDPDataHandler:
 class DataCleaner:
     @staticmethod
     def normalize_column_names(transaction_data, country_data) -> DataFrame:
+        """
+        # TODO this function modify the original dataframe
+        """
+
         transaction_data.replace({"q": "           NA"}, "0", inplace=True)
         transaction_data["q"] = transaction_data["q"].astype(float)
+
         country_map = pd.Series(
             country_data[CountryCodes.ISO_CODE_3.value].values,
             index=country_data[CountryCodes.CODE.value],
         ).to_dict()
+
         transaction_data["i"] = transaction_data["i"].map(country_map)
         transaction_data["j"] = transaction_data["j"].map(country_map)
+
         transaction_data.rename(
             columns={
                 "t": BACIColumnsTradeData.YEAR.value,
@@ -134,7 +144,7 @@ class DataCleaner:
             data_corrected = gpd_handler.to_constant_usd(cleaned_data, year)
 
             data_corrected.to_csv(
-                paths["cleaned_data_dir"] + f"cleaned_HS92_Y{year}_V202401b.csv",
+                os.getenv("cleaned_data_dir") + f"cleaned_HS92_Y{year}_V202401b.csv",
                 index=False
             )
 
