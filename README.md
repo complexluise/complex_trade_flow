@@ -1,4 +1,4 @@
-# 🌍 complex_trade_flow: Desentrañando las Complejidades del Comercio Global
+# 🌍 complex_trade_flow: Desentrañando las Complejidades del Comercio Internacional
 
 ![Versión de Python](https://img.shields.io/badge/python-3.7%2B-blue)
 ![Licencia](https://img.shields.io/badge/license-MIT-green)
@@ -7,8 +7,8 @@
 
 ## 🚀 Funcionalidades
 
-- **Limpieza de Datos**: Procesa fácilmente los datos crudos de BACI CEPII y del Banco Mundial
-- **Análisis de Diversidad**: Calcula la diversidad de exportaciones e importaciones utilizando la entropía de Shannon
+- **Limpieza de Datos**: Procesa fácilmente los datos crudos de BACI CEPII y del Banco Mundial.
+- **Análisis de Diversidad**: Calcula la diversidad de exportaciones e importaciones utilizando la entropía de Shannon.
 - **Clasificación Flexible**: Agrupa países según varios esquemas (región, nivel de ingresos, etc.)
 
 
@@ -96,9 +96,9 @@ Si quieres contribuir puedes empezar solucionando los TODO en el código.
 
 ## 🙏 Agradecimientos
 
+- A GEINCyR por brindar un espacio de aprendizajes y discusión de la complejidad no solo desde un punto de vista técnico sino como un cambio de visión de mundo.
 - A BACI CEPII por proporcionar completos datos de comercio internacional.
 - Al Banco Mundial por indicadores económicos adicionales.
-- A GEINCyR por brindar un espacio de aprendizajes y discusión de la complejidad no solo desde un punto de vista técnico sino como un cambio de visión de mundo
 
 ---
 
