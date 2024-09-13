@@ -137,7 +137,7 @@ st.plotly_chart(update_figure(year, palette), use_container_width=True)
 
 st.title("Diversidad a lo largo del tiempo: Latinoamérica y Mundo")
 diversity_type = st.selectbox("Elige tipo de diversidad:", ["Both", "Export", "Import"], index=0)
-classification_scheme = st.selectbox("Elige el tipo de clasificación: ", ["by_region", "by_advanced_not-advanced", "Latinoamerica"], index=0)
+classification_scheme = st.selectbox("Elige el tipo de clasificación: ", ["by_region", "by_advanced_not-advanced"], index=0)
 palette = get_palette_and_name(classification_scheme)
 
 df_classified = {
