@@ -42,7 +42,7 @@ def filter_dataframe(df: pd.DataFrame, year: int) -> pd.DataFrame:
 
 def get_palette_and_name(scheme: str):
     palettes = {
-        "by_region": {
+        "por_region": {
             "Latin America & Caribbean ": '#1f77b4',
             "Aggregates": '#ff7f0e',
             "South Asia": '#2ca02c',
@@ -52,10 +52,10 @@ def get_palette_and_name(scheme: str):
             "East Asia & Pacific": '#e377c2',
             "North America": '#7f7f7f'
         },
-        "by_advanced_not-advanced": {
+        "por_avanzadas": {
             "Unknown": '#bcbd22',
-            "Advanced Economies": '#17becf',
-            "Not-advanced Economies": '#e377c2'
+            "Economías avanzadas": '#17becf',
+            "Economías no avanzadas": '#e377c2'
         },
         "Latinoamerica": {
             "Latinoamérica": '#1f77b4',
@@ -100,7 +100,7 @@ def diversity_over_time_plot(df: pd.DataFrame, diversity_type: str, palette: dic
 
     for region in df[classification_scheme].unique():
         region_data = df[df[classification_scheme] == region]
-        if diversity_type in ["Both", "Export"]:
+        if diversity_type in ["Ambos", "Exportación"]:
             fig.add_trace(go.Scatter(
                 x=region_data['year'],
                 y=region_data['export_product_diversity'],
@@ -109,7 +109,7 @@ def diversity_over_time_plot(df: pd.DataFrame, diversity_type: str, palette: dic
                 line=dict(color=palette.get(region, '#000000')),
                 legendgroup=region
             ))
-        if diversity_type in ["Both", "Import"]:
+        if diversity_type in ["Ambos", "Importación"]:
             fig.add_trace(go.Scatter(
                 x=region_data['year'],
                 y=region_data['import_product_diversity'],
@@ -136,12 +136,12 @@ palette = get_palette_and_name("Latinoamerica")
 st.plotly_chart(update_figure(year, palette), use_container_width=True)
 
 st.title("Diversidad a lo largo del tiempo: Latinoamérica y Mundo")
-diversity_type = st.selectbox("Elige tipo de diversidad:", ["Both", "Export", "Import"], index=0)
-classification_scheme = st.selectbox("Elige el tipo de clasificación: ", ["by_region", "by_advanced_not-advanced"], index=0)
+diversity_type = st.selectbox("Elige tipo de diversidad:", ["Ambos", "Exportación", "Importación"], index=0)
+classification_scheme = st.selectbox("Elige el tipo de clasificación: ", ["por_region", "por_avanzadas"], index=0)
 palette = get_palette_and_name(classification_scheme)
 
 df_classified = {
-        "by_region": load_data_diversity_classification_region(),
-        "by_advanced_not-advanced": load_data_diversity_classification_advanced()
+        "por_region": load_data_diversity_classification_region(),
+        "por_avanzadas": load_data_diversity_classification_advanced()
 }
 st.plotly_chart(diversity_over_time_plot(df_classified[classification_scheme], diversity_type, palette, classification_scheme), use_container_width=True)
