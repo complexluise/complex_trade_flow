@@ -106,9 +106,46 @@ if __name__ == "__main__":
         # "description":"Inflation, GDP deflator (annual %)"}
         # {"indicator_code": 'NY.GDP.DEFL.ZS',
         # "description":"GDP deflator (base year varies by country)"},
+        #{
+        #    "indicator_code": "NY.GDP.DEFL.ZS.AD",
+        #    "description": "GDP deflator: linked series (base year varies by country)",
+        #}
+        #{
+        #    "indicator_code": "SI.POV.GINI",
+        #    "description": "Gini coefficient of income distribution",
+        #},
+        #{
+        #    "indicator_code": "SI.DST.10TH.10",
+        #    "description": "Income share held by highest 10%"
+        #},
+        #{
+        #    "indicator_code": "SI.DST.FRST.20",
+        #    "description": "Income share held by lowest 20%"
+        #},
+        #{
+        #    "indicator_code": "SI.DST.05TH.20",
+        #    "description": "Income share held by highest 20%"
+        #},
+        #{
+        #    "indicator_code": "SI.SPR.PC40.ZG",
+        #    "description": "Annualized average growth rate in per capita real survey mean consumption or income, bottom 40% of population (%)"
+        #},
+        # Impacto ecológico
         {
-            "indicator_code": "NY.GDP.DEFL.ZS.AD",
-            "description": "GDP deflator: linked series (base year varies by country)",
+            "indicator_code": "EN.ATM.CO2E.PC",
+            "description": "CO2 emissions (metric tons per capita)"
+        },
+        {
+            "indicator_code": "EG.USE.PCAP.KG.OE",
+            "description": "Energy use (kg of oil equivalent per capita)",
+        },
+        {
+            "indicator_code": "EG.FEC.RNEW.ZS",
+            "description": "Renewable energy consumption (% of total final energy consumption)"
+        },
+        {
+            "indicator_code": "NY.ADJ.SVNG.GN.ZS",
+            "description": "Adjusted net savings, including particulate emission damage (% of GNI)"
         }
     ]
     dates = "1995:2022"
