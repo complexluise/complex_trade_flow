@@ -3,6 +3,7 @@ from enum import Enum
 
 class EconomicComplexity(Enum):
     ENTITY_PRODUCT_DIVERSIFICATION = "compute_entity_product_diversification"
+    ENTITY_TRADE_METRICS = "compute_entity_trade_metrics"
 
 
 class BACIColumnsTradeData(Enum):
