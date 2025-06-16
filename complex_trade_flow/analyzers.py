@@ -16,7 +16,7 @@ from .utils import ClassificationScheme
 from complex_trade_flow import TradeNetwork
 
 
-class EconomicComplexityAnalyzer:
+class EconomicDiversityAnalyzer:
     """
     TODO: algunas cosas acopladas como los directorios
     """
