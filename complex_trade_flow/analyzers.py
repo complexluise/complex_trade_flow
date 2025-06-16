@@ -28,7 +28,7 @@ class EconomicComplexityAnalyzer:
         }
 
     def analyze_year(self, year: int, scheme_name: str, type_analysis: EconomicComplexity) -> DataFrame:
-        network = TradeNetwork(year, self.classification_schemes)
+        network = TradeNetwork.from_year(year, classification_schemes=self.classification_schemes)
 
         analysis: Callable = self.analysis_dict[type_analysis.value]
 
