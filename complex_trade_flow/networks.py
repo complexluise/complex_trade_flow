@@ -11,28 +11,51 @@ class TradeNetwork:
     """
     Representa una red de comercio para un año específico.
     """
-    def __init__(self, year: int, classification_schemes: list[ClassificationScheme], trade_data: Optional[pd.DataFrame] = None):
-        self.year = year
-        self.trade_data = trade_data if trade_data is not None else self._load_trade_data()
+
+    def __init__(
+            self,
+            trade_data: pd.DataFrame,
+            classification_schemes: list[ClassificationScheme] | None = None
+    ):
+        self.trade_data = trade_data  # TODO validate trade data
         self.countries: set[str] = set(pd.concat([
             self.trade_data[BACIColumnsTradeData.IMPORTER_ISO_CODE_3.value],
             self.trade_data[BACIColumnsTradeData.EXPORTER_ISO_CODE_3.value]
         ]).unique())
         self.products: set[str] = set(self.trade_data[BACIColumnsTradeData.PRODUCT_CATEGORY_CODE.value])
-        self.classification_schemes = classification_schemes
-        self.classified_countries = self._apply_classifications()
-        self.entities = self._get_entities(self.classified_countries)
-        self.trade_data_classified = self._classify_trade_data()
 
-    def _load_trade_data(self) -> pd.DataFrame:
+        if classification_schemes:
+            self.classification_schemes = classification_schemes
+            self.classified_countries = self._apply_classifications()
+            self.entities = self._get_entities(self.classified_countries)
+            self.trade_data_classified = self._classify_trade_data()
+
+    @classmethod
+    def from_year(
+            cls,
+            year: int,
+            base_directory: str = "data/processed_data/BACI_HS92_V202401b/cleaned_trade_data/",
+            classification_schemes: list[ClassificationScheme] | None = None
+    ) -> "TradeNetwork":
         """
-        Carga los datos de comercio para el año especificado.
+        Crea una instancia de TradeNetwork para un año específico cargando datos de comercio.
+        Este método actúa como un constructor alternativo para la clase TradeNetwork.
+
+        Args:
+            year: Un entero que representa el año para el cual se cargarán los datos comerciales.
+            base_directory: Una cadena que representa la ruta del directorio base donde
+                se almacenan los archivos de datos comerciales. Por defecto es
+                "data/processed_data/BACI_HS92_V202401b/cleaned_trade_data/".
+            classification_schemes: Una lista opcional de objetos ClassificationScheme
+                para clasificar los datos comerciales. Por defecto es None.
 
         Returns:
-            pd.DataFrame: El DataFrame con los datos de comercio.
+            Una instancia de la clase TradeNetwork que contiene datos comerciales para el
+            año especificado.
         """
-        trade_data_loader = TradeDataLoader("data/processed_data/BACI_HS92_V202401b/cleaned_trade_data/")
-        return trade_data_loader.load_trade_data(self.year)
+        trade_data = TradeDataLoader(base_directory).load_trade_data(year)
+        return cls(trade_data=trade_data, classification_schemes=classification_schemes)
+
 
     def _apply_classifications(self) -> dict[str, dict[str, str]]:
         """
